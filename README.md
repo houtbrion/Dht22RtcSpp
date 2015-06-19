@@ -138,7 +138,7 @@ GPLv2にしときます．
 以下の*define文*を有効にすると，シリアルにメッセージが
 出力される．
 
-`#define USE\_SERIAL`
+`#define USE_SERIAL`
 
 
 ## その他
