@@ -51,7 +51,7 @@ CPUのウォッチドッグタイマはタイマが発火する期間が非常�
 * 箱 : [Arduino用ケース(千石電商)][case]
 * RTC : [3564NB(秋月電子通商)][rtc]
 * USBインターフェース : [USBホストシールド][HostShield]
-* Bluetoothインターフェース : [Bluetooth®4.0+EDR/LE対応 USBアダプター][bluetooth]
+* Bluetoothインターフェース : [BluetoothR4.0+EDR/LE対応 USBアダプター][bluetooth]
 
 ## 回路図など
 本来の回路は[Arduino Mega 2560][Mega2560]で作っていますが，
@@ -173,12 +173,12 @@ CPUのウォッチドッグタイマはタイマが発火する期間が非常�
 [case]: <https://www.sengoku.co.jp/mod/sgk\_cart/detail.php?code=EEHD-4CLA> "Arduino用ケース(千石電商)"
 [rtc]: <http://akizukidenshi.com/catalog/g/gI-00233/> "3564NB(秋月電子通商)"
 [HostShield]: <http://www.aitendo.com/product/10293> "USBホストシールド"
-[bluetooth]: <http://buffalo.jp/product/peripheral/wireless-adapter/bsbt4d09bk/> "Bluetooth®4.0+EDR/LE対応 USBアダプター"
+[bluetooth]: <http://buffalo.jp/product/peripheral/wireless-adapter/bsbt4d09bk/> "BluetoothR4.0+EDR/LE対応 USBアダプター"
 
 <!--イメージファイル-->
-[system]: system.jpg "本体写真"
-[breadboard]: breadboard.jpg "ブレッドボード利用時の配線イメージ"
-[circuit]: circuit.jpg "回路図"
+[system]: Doc/fig/system.jpg "本体写真"
+[breadboard]: Doc/fig/breadboard.jpg "ブレッドボード利用時の配線イメージ"
+[circuit]: Doc/fig/circuit.jpg "回路図"
 
 
 
