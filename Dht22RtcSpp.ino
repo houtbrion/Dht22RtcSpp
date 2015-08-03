@@ -130,7 +130,7 @@ static int uart_putchar (char c, FILE *stream) {
 #ifdef USE_RTC
 void InterRTC()
 {
-  RTC.InterFlag = 1 ;
+  skRTC.InterFlag = 1 ;
 #ifdef USE_SERIAL
   Serial.println(F("Interupt"));
 #endif /* USE_SERIAL */
@@ -156,7 +156,7 @@ void setup()
   Serial.begin(9600) ;                    // シリアル通信の初期化
 #endif /* USE_SERIAL */
 #ifdef USE_RTC
-  ans = RTC.begin(PIN_NUMBER,INT_NUMBER,InterRTC,12,1,10,2,15,30,0) ;  // 2012/01/10 火 15:30:00 でRTCを初期化する
+  ans = skRTC.begin(PIN_NUMBER,INT_NUMBER,InterRTC,12,1,10,2,15,30,0) ;  // 2012/01/10 火 15:30:00 でRTCを初期化する
   if (ans == 0) {
 #ifdef USE_SERIAL
     Serial.println(F("Successful initialization of the RTC")) ;// 初期化成功
@@ -168,7 +168,7 @@ void setup()
 #endif /* USE_SERIAL */
     while(1) ;                         // 処理中断
   }
-  RTC.SetTimer(SLEEP_UNIT,SLEEP_DURATION) ;
+  skRTC.SetTimer(SLEEP_UNIT,SLEEP_DURATION) ;
 #endif /* USE_RTC */
   if (Usb.Init() == -1) {
 #ifdef USE_SERIAL
@@ -234,8 +234,8 @@ void loop()
     }
 #ifdef USE_RTC
     goodNight(STANDBY_MODE);// 端末を眠らせる
-    if (RTC.InterFlag == 1) {  // 割込みが発生したか？
-      RTC.InterFlag = 0 ;                // 割込みフラグをクリアする
+    if (skRTC.InterFlag == 1) {  // 割込みが発生したか？
+      skRTC.InterFlag = 0 ;                // 割込みフラグをクリアする
     }
 #else /* USE_RTC */
     delay(30000);
