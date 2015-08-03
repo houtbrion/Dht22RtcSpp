@@ -32,9 +32,11 @@ CPUのウォッチドッグタイマはタイマが発火する期間が非常�
 * [Arduino Mega ADK][adk]はUSBホスト機能が存在するのに，現状対応していない．
 * プログラムサイズが大きすぎて，[Arduino Uno][Uno]で動かない．
 
-とりあえず，[Arduino Mega ADK][adk]は次に試してみたい．また，
+とりあえず，[Arduino Mega ADK][adk]で簡易なテストをしてみた試したところ，
+USBホストシールドのライブラリでADKのUSBポートは駆動できる模様．
+また，
 [Arduino Uno][Uno]に関しては，USBを経由しないBluetoothの
-シールドを使って，動作させることができるかどうかトライする．
+シールドを使って，動作させることができるかどうか別ネタとしてトライする．
 
 # ライセンス
 きむ茶さん，adafruit共に，ライブラリやサンプルプログラムにライセンスが明示されていないので
@@ -66,7 +68,7 @@ CPUのウォッチドッグタイマはタイマが発火する期間が非常�
 ## 開発環境と各種ライブラリ
 * [Arduino開発環境][ide] : バージョン1.6.4
 * [DHTセンサのライブラリ][dht]
-* [きむ茶さんのRTCライブラリ][skRTClib]
+* [きむ茶さんのRTCライブラリを改造したもの][skRTClib]
 * [USBホストシールド用ライブラリ][usbhost]
 
 # 内部動作の特徴
@@ -162,12 +164,14 @@ CPUのウォッチドッグタイマはタイマが発火する期間が非常�
 <!--開発環境と各種ライブラリ-->
 [ide]: <http://www.arduino.cc/en/Main/Software> "Arduino開発環境"
 [dht]: <https://github.com/adafruit/DHT-sensor-library> "DHTセンサのライブラリ"
-[skRTClib]: <http://www.geocities.jp/zattouka/GarageHouse/micon/Arduino/RTC/skRTClib.lzh> "きむ茶さんのRTCライブラリ"
+[skRTClibOrig]: <http://www.geocities.jp/zattouka/GarageHouse/micon/Arduino/RTC/skRTClib.lzh> "きむ茶さんのRTCライブラリ"
+[skRTClib]: <https://github.com/houtbrion/skRTClib> "きむ茶さんのRTCライブラリを改造したバージョン"
 [usbhost]: <https://github.com/felis/USB\_Host\_Shield\_2.0> "USBホストシールド用ライブラリ"
 
 <!--ハード関連-->
 [Uno]: <http://www.arduino.cc/en/Main/ArduinoBoardUno> "Arduino Uno"
 [Mega2560]: <http://www.arduino.cc/en/Main/ArduinoBoardMega2560> "Arduino Mega 2560"
+[M0pro]: <http://www.arduino.org/products/arduino-m0-pro> "Arduino M0 pro"
 [adk]: <http://www.arduino.cc/en/Main/ArduinoBoardMegaADK?from=Main.ArduinoBoardADK> "Arduino Mega ADK"
 [DHT22]: <http://akizukidenshi.com/catalog/g/gM-07002/> "DHT22(秋月電子通商)"
 [case]: <https://www.sengoku.co.jp/mod/sgk\_cart/detail.php?code=EEHD-4CLA> "Arduino用ケース(千石電商)"

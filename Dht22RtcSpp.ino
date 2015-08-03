@@ -1,17 +1,17 @@
-//
-// DHT系のセンサを使って，温度と湿度を測定し，Bluetoothで送信するプログラム
-// RTCを使って，一定時間間隔で測定と送信を実行する．
-// 測定していない期間はArduinoはスリープ状態となり，
-// RTCの割込みで処理が再開する
-//
+/*
+ * DHT系のセンサを使って，温度と湿度を測定し，Bluetoothで送信するプログラム
+ * RTCを使って，一定時間間隔で測定と送信を実行する．
+ * 測定していない期間はArduinoはスリープ状態となり，
+ * RTCの割込みで処理が再開する
+ */
 
 #define USE_SERIAL
 #define USE_RTC
 
 
-//
-// USBホストシールドでBluetoothを使うための各種定義
-//
+/*
+ * USBホストシールドでBluetoothを使うための各種定義
+ */
 
 #include <SPP.h>
 //#include <usbhub.h>
@@ -30,35 +30,35 @@ BTD Btd(&Usb); // You have to create the Bluetooth Dongle instance like so
 SPP SerialBT(&Btd); // This will set the name to the defaults: "Arduino" and the pin to "0000"
 //SPP SerialBT(&Btd, "Lauszus's Arduino", "1234"); // You can also set the name and pin like so
 
-//
-// RTC8564用のライブラリを使うためのインクルードのロードと各種定義
-//
+/*
+ * RTC8564用のライブラリを使うためのインクルードのロードと各種定義
+ */
 #ifdef USE_RTC
-//
 #include <Wire.h>
 #include <skRTClib.h>
 #include <avr/sleep.h>
-//
-// RTCからarduinoに割込みを上げる端子と割込み番号の指定
-// 本当なら，割込み番号を入れたら端子も機種毎の切り替えを効かせたいが，とりあえず固定指定
-//
+/*
+ * RTCからarduinoに割込みを上げる端子と割込み番号の指定
+ * 本当なら，割込み番号を入れたら端子も機種毎の切り替えを効かせたいが，とりあえず固定指定
+ */
 // 手持ちのMega2560では，INT0,1が動作しなかったため，大きい番号の割込みを利用
 #define INT_NUMBER 5
 #define PIN_NUMBER 18
 // UNOはINT0,1が動作するため，こちらを利用
 //#define INT_NUMBER 0
 //#define PIN_NUMBER 2
-//
-//　端末が眠る場合の眠りの深さの指定
-//
+/*
+ *　端末が眠る場合の眠りの深さの指定
+ */
 //#define STANDBY_MODE SLEEP_MODE_IDLE
 //#define STANDBY_MODE SLEEP_MODE_ADC
 //#define STANDBY_MODE SLEEP_MODE_PWR_SAVE
 //#define STANDBY_MODE SLEEP_MODE_STANDBY
 #define STANDBY_MODE SLEEP_MODE_PWR_DOWN
-//
-// 端末が眠る期間の指定
-//
+
+/*
+ * 端末が眠る期間の指定
+ */
 #define SLEEP_DURATION 10 //単位の倍数
 //#define SLEEP_UNIT 0 // 244.14us単位
 //#define SLEEP_UNIT 1 //15.625ms単位
@@ -76,12 +76,13 @@ SPP SerialBT(&Btd); // This will set the name to the defaults: "Arduino" and the
 #include <DHT.h>
 #define DHTPIN 5     // what pin we're connected to
 
-// Uncomment whatever type you're using!
+// DHTの種類の選択
 //#define DHTTYPE DHT11   // DHT 11 
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
-// Connect pin 1 (on the left) of the sensor to +5V
+// Adafruitの注意事項，よく読むこと
+// Connect pin 1 (on the left) of the sensor to +5V  (3V動作のマシンでは，センサの電源端子には3Vを入力)
 // NOTE: If using a board with 3.3V logic like an Arduino Due connect pin 1
 // to 3.3V instead of 5V!
 // Connect pin 2 of the sensor to whatever your DHTPIN is
@@ -89,6 +90,7 @@ SPP SerialBT(&Btd); // This will set the name to the defaults: "Arduino" and the
 // Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor
 
 // Initialize DHT sensor for normal 16mhz Arduino
+// 普通のArduinoは以下の関数を利用
 DHT dht(DHTPIN, DHTTYPE);
 // NOTE: For working with a faster chip, like an Arduino Due or Teensy, you
 // might need to increase the threshold for cycle counts considered a 1 or 0.
@@ -97,17 +99,24 @@ DHT dht(DHTPIN, DHTTYPE);
 // higher the value.  The default for a 16mhz AVR is a value of 6.  For an
 // Arduino Due that runs at 84mhz a value of 30 works.
 // Example to initialize DHT sensor for Arduino Due:
+//
+// Dueの例
+//
 //DHT dht(DHTPIN, DHTTYPE, 30);
+//
+// arduino M0 proの場合
+//DHT dht(DHTPIN, DHTTYPE,18);
 
-//
-// 安全対策など
-//
+/*
+ * 安全対策など
+ */
 int counter=0; //一定回数システムが動作したら端末を再起動させるためのカウンタ
 #define KELVIN 273.15 //絶対温度と摂氏の変換に利用
 #define THRESHOLD 20
-//
-// 以下，プログラム本体
-//
+
+/*
+ * 以下，プログラム本体
+ */
 #ifdef USE_SERIAL
 bool firstMessage = true;
 static FILE uartout;
@@ -121,12 +130,14 @@ static int uart_putchar (char c, FILE *stream) {
 }
 #endif /* USE_SERIAL */
 
-// RTC(CLKOUT)からの外部割込みで処理される関数
-// loop()の中で割込みが起きたかどうかを判定するための
-// フラグを立てる
-//
-// 他の処理を書いても良いが，割込みを使わないものに限る
-//
+
+/*
+ * RTC(CLKOUT)からの外部割込みで実行される関数
+ * loop()の中で割込みが起きたかどうかを判定するための
+ * フラグを立てる．
+ * 他の処理を書いても良いが，割込みを使わないものに限る．
+ */
+
 #ifdef USE_RTC
 void InterRTC()
 {
@@ -137,11 +148,11 @@ void InterRTC()
 }
 #endif /* USE_RTC */
 
-//
-// 初期化
-// USB, Bluetooth,センサの初期化を実施
-// 初期化に失敗したら，無限ループに入る
-//
+/*
+ * 初期化
+ * USB, Bluetooth,センサの初期化を実施
+ * 初期化に失敗したら，無限ループに入る
+ */
 void setup()
 {
   int ans ;
@@ -181,9 +192,9 @@ void setup()
 #endif /* USE_SERIAL */
 }
 
-//
-// メインのループ
-//
+/*
+ * メインのループ
+ */
 void loop()
 {
   Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
@@ -246,9 +257,9 @@ void loop()
 #endif /* USE_SERIAL */
   }
 }
-//
-// 端末をスリープ状態に設定する関数
-//
+/*
+ * 端末をスリープ状態に設定する関数
+ */
 #ifdef USE_RTC
 void goodNight(int i) {
 #ifdef USE_SERIAL
@@ -263,10 +274,10 @@ void goodNight(int i) {
   sleep_disable();
 }
 #endif /* USE_RTC */
-//
-// 長時間動作させた場合に，動作がおかしくなるのを防ぐため
-// たまにリセットする時に使う関数
-//
+/*
+ * 長時間動作させた場合に，動作がおかしくなるのを防ぐため
+ * たまにリセットする時に使う関数
+ */
 void software_Reset(){
 #ifdef USE_SERIAL
   Serial.println(F(" RESET"));
