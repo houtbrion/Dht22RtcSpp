@@ -1,6 +1,7 @@
 # Arduino-DHT22-RTC-SPP
 RTCで一定周期でArduinoを起こし，DHT22を使って温度と湿度を測定し，
-USBホストシールドの先につながったbluetoothアダプタを使って
+USBホストシールドの先につながったbluetoothアダプタ，もしくは
+秋月電子通商製のRN42開発モジュールを使って
 送信する
 Arduino用プログラム
 
@@ -28,15 +29,18 @@ CPUのウォッチドッグタイマはタイマが発火する期間が非常�
 [Bluetooth4.0+EDR/LE対応 USBアダプター][bluetooth]を使って
 サーバに送信する．
 
+USB接続のBluetoothドングルを使うと，メモリの消費量が大きく
+Mega系のマシンでしか実行できないため，
+シリアルポートと[RN42][RN42]を接続し，
+Bluetoothのシリアルプロファイルで送信する機能も作った．
+
+
 # 現在の問題と次のネタ
 * [Arduino Mega ADK][adk]はUSBホスト機能が存在するのに，現状対応していない．
-* プログラムサイズが大きすぎて，[Arduino Uno][Uno]で動かない．
+* USB接続のドングルの場合，プログラムサイズが大きすぎて，[Arduino Uno][Uno]で動かない．
 
 とりあえず，[Arduino Mega ADK][adk]で簡易なテストをしてみた試したところ，
 USBホストシールドのライブラリでADKのUSBポートは駆動できる模様．
-また，
-[Arduino Uno][Uno]に関しては，USBを経由しないBluetoothの
-シールドを使って，動作させることができるかどうか別ネタとしてトライする．
 
 # ライセンス
 きむ茶さん，adafruit共に，ライブラリやサンプルプログラムにライセンスが明示されていないので
@@ -54,8 +58,10 @@ USBホストシールドのライブラリでADKのUSBポートは駆動でき�
 * RTC : [3564NB(秋月電子通商)][rtc]
 * USBインターフェース : [USBホストシールド][HostShield]
 * Bluetoothインターフェース : [BluetoothR4.0+EDR/LE対応 USBアダプター][bluetooth]
+* Bluetoothドングルの代わりに用いるBluetoothモジュール(RN-42使用Bluetooth無線モジュール評価キット) : [RN42][RN42]
 
 ## 回路図など
+USBドングル版の回路図は以下の通り．
 本来の回路は[Arduino Mega 2560][Mega2560]で作っていますが，
 [USBホストシールド][HostShield]が入ると
 回路図がややこしくなるため，
@@ -64,6 +70,8 @@ USBホストシールドのライブラリでADKのUSBポートは駆動でき�
 ![ブレッドボード利用時のイメージ][breadboard]
 
 ![回路図][circuit]
+
+詳細はソースに添付してあるfritzingの回路図を参照．
 
 ## 開発環境と各種ライブラリ
 * [Arduino開発環境][ide] : バージョン1.6.4
@@ -178,6 +186,7 @@ USBホストシールドのライブラリでADKのUSBポートは駆動でき�
 [rtc]: <http://akizukidenshi.com/catalog/g/gI-00233/> "3564NB(秋月電子通商)"
 [HostShield]: <http://www.aitendo.com/product/10293> "USBホストシールド"
 [bluetooth]: <http://buffalo.jp/product/peripheral/wireless-adapter/bsbt4d09bk/> "BluetoothR4.0+EDR/LE対応 USBアダプター"
+[RN42]: <http://akizukidenshi.com/catalog/g/gK-07378/> "ＲＮ－４２使用　Ｂｌｕｅｔｏｏｔｈ無線モジュール評価キット"
 
 <!--イメージファイル-->
 [system]: Doc/fig/system.jpg "本体写真"

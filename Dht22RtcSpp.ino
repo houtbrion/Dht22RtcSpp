@@ -7,8 +7,14 @@
 
 #define USE_SERIAL
 #define USE_RTC
+#define USE_SOFT_SERIAL
+//#define USE_USB
 
 
+#ifdef USE_SOFT_SERIAL
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(2, 3);
+#endif /* USE_SOFT_SERIAL */
 /*
  * USBホストシールドでBluetoothを使うための各種定義
  */
@@ -22,6 +28,7 @@
 #include <SPI.h>
 #endif
 
+#ifdef USE_USB
 USB Usb;
 //USBHub Hub1(&Usb); // Some dongles have a hub inside
 
@@ -29,6 +36,7 @@ BTD Btd(&Usb); // You have to create the Bluetooth Dongle instance like so
 /* You can create the instance of the class in two ways */
 SPP SerialBT(&Btd); // This will set the name to the defaults: "Arduino" and the pin to "0000"
 //SPP SerialBT(&Btd, "Lauszus's Arduino", "1234"); // You can also set the name and pin like so
+#endif /* USE_USB */
 
 /*
  * RTC8564用のライブラリを使うためのインクルードのロードと各種定義
@@ -149,6 +157,34 @@ void InterRTC()
 #endif /* USE_RTC */
 
 /*
+ * 端末をスリープ状態に設定する関数
+ */
+#ifdef USE_RTC
+void goodNight(int i) {
+#ifdef USE_SERIAL
+  Serial.println(F("  Good Night"));
+#endif /* USE_SERIAL */
+  delay(100);
+  noInterrupts();
+  set_sleep_mode(i);
+  sleep_enable();
+  interrupts();
+  sleep_cpu();
+  sleep_disable();
+}
+#endif /* USE_RTC */
+/*
+ * 長時間動作させた場合に，動作がおかしくなるのを防ぐため
+ * たまにリセットする時に使う関数
+ */
+void software_Reset(){
+#ifdef USE_SERIAL
+  Serial.println(F(" RESET"));
+#endif /* USE_SERIAL */
+  asm volatile ("  jmp 0");
+} 
+
+/*
  * 初期化
  * USB, Bluetooth,センサの初期化を実施
  * 初期化に失敗したら，無限ループに入る
@@ -166,6 +202,9 @@ void setup()
 #ifdef USE_SERIAL
   Serial.begin(9600) ;                    // シリアル通信の初期化
 #endif /* USE_SERIAL */
+#ifdef USE_SOFT_SERIAL
+  mySerial.begin(9600);
+#endif /* USE_SOFT_SERIAL */
 #ifdef USE_RTC
   ans = skRTC.begin(PIN_NUMBER,INT_NUMBER,InterRTC,12,1,10,2,15,30,0) ;  // 2012/01/10 火 15:30:00 でRTCを初期化する
   if (ans == 0) {
@@ -181,6 +220,7 @@ void setup()
   }
   skRTC.SetTimer(SLEEP_UNIT,SLEEP_DURATION) ;
 #endif /* USE_RTC */
+#ifdef USE_USB
   if (Usb.Init() == -1) {
 #ifdef USE_SERIAL
     Serial.print(F("\r\nOSC did not start"));
@@ -190,11 +230,13 @@ void setup()
 #ifdef USE_SERIAL
   Serial.print(F("\r\nSPP Bluetooth Library Started"));
 #endif /* USE_SERIAL */
+#endif /* USE_USB */
 }
 
 /*
  * メインのループ
  */
+#ifdef USE_USB
 void loop()
 {
   Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
@@ -257,32 +299,55 @@ void loop()
 #endif /* USE_SERIAL */
   }
 }
-/*
- * 端末をスリープ状態に設定する関数
- */
+#else /* USE_USB */
+void loop()
+{
+  float h = dht.readHumidity(); //湿度
+  float t = dht.readTemperature(false); //摂氏
+  float hi = dht.convertFtoC(dht.computeHeatIndex(dht.convertCtoF(t),h)); //体感温度
+#ifdef USE_SERIAL
+  if (isnan(t) || isnan(h)) {
+    Serial.println(F("Failed to read from DHT"));
+  } else {
+#else /* USE_SERIAL */
+  if (!(isnan(t) || isnan(h))) {
+#endif /* USE_SERIAL */
+    // マイナス温度の処理の関係上，絶対温度で送信する
+    t += KELVIN;
+    hi += KELVIN;
+#ifdef USE_SOFT_SERIAL
+    mySerial.print(F("Humidity: ")); 
+    mySerial.print(h);
+    mySerial.print(F(" %\t"));
+    mySerial.print(F("Temperature: ")); 
+    mySerial.print(t);
+    mySerial.println(F(" *C"));
+    mySerial.print(F("Heat Index : "));
+    mySerial.println(hi);
+#endif /* USE_SOFT_SERIAL */
+#ifdef USE_SERIAL
+    Serial.print(F("Humidity: ")); 
+    Serial.print(h);
+    Serial.print(F(" %\t"));
+    Serial.print(F("Temperature: ")); 
+    Serial.print(t);
+    Serial.println(F(" *C"));
+    Serial.print(F("Heat Index : "));
+    Serial.println(hi);
+#endif /* USE_SERIAL */
+    counter++;
+    if (counter==THRESHOLD) {
+      // 一定時間以上動作したら一回端末をリセットする
+      software_Reset();
+    }
 #ifdef USE_RTC
-void goodNight(int i) {
-#ifdef USE_SERIAL
-  Serial.println(F("  Good Night"));
-#endif /* USE_SERIAL */
-  delay(100);
-  noInterrupts();
-  set_sleep_mode(i);
-  sleep_enable();
-  interrupts();
-  sleep_cpu();
-  sleep_disable();
-}
+    goodNight(STANDBY_MODE);// 端末を眠らせる
+    if (skRTC.InterFlag == 1) {  // 割込みが発生したか？
+      skRTC.InterFlag = 0 ;                // 割込みフラグをクリアする
+    }
+#else /* USE_RTC */
+    delay(30000);
 #endif /* USE_RTC */
-/*
- * 長時間動作させた場合に，動作がおかしくなるのを防ぐため
- * たまにリセットする時に使う関数
- */
-void software_Reset(){
-#ifdef USE_SERIAL
-  Serial.println(F(" RESET"));
-#endif /* USE_SERIAL */
-  asm volatile ("  jmp 0");
-} 
-
-
+  }
+}
+#endif /* USE_USB */
